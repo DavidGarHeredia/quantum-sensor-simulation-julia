@@ -4,7 +4,6 @@ using ArgParse
 include("simulate.jl")
 include("save_results.jl")
 
-# from save_results import save_results
 
 function parse_commandline()
     s = ArgParseSettings()

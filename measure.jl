@@ -30,7 +30,7 @@ function get_probabilities(
 )
     ρ_f_camera = partial_trace(ρ_f, [1, 2])
     @reduce probabilities[k] := sum(i, j) ρ_f_camera[i, j] * projectors[k][j, i]
-    # probabilities = [tr(ρ_f_c*P_i) for P_i in projectors] # quizas sea más lento por hacer más operaciones
+    # probabilities = [tr(ρ_f_c*P_i) for P_i in projectors]
     # probabilities = probabilities/np.sum(probabilities)
 
     return real(probabilities)

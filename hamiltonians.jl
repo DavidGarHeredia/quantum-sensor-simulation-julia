@@ -63,7 +63,7 @@ function get_H_c(
     ω = -γ_c*B
     S_x, S_z = S[:, 1], S[:, 3]
     @reduce H_c_0[p,q] := sum(i) ω/2*S_z[i][p,q]
-    @reduce H_c_int[p,q] := sum(i,j,r) ω/10*S_x[i][p,r]*S_x[j][r,q] # TODO: caso i=j???
+    @reduce H_c_int[p,q] := sum(i,j,r) ω/10*S_x[i][p,r]*S_x[j][r,q] # TODO: case i=j???
     H_c = H_c_0 + H_c_int
     
     return H_c
