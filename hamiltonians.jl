@@ -2,11 +2,9 @@ using LinearAlgebra
 using TensorCast
 
 function get_qubits_coordinates(nqubits::Int, d_c::Float64)
+    positions = zeros(nqubits, 2)
     L = (nqubits - 1)*d_c
-    x = LinRange(-L/2, L/2, nqubits)
-    y = zeros(nqubits)
-    positions = cat(x, y; dims=2)
-
+    positions[:, 1] = LinRange(-L/2, L/2, nqubits)
     return positions
 end
 
@@ -30,13 +28,13 @@ function cartesian2polar(coordinates::Matrix{Float64})
 end
 
 
-function extended_pauli_operators(; dim_left::Int, dim_right::Int)
+function extended_pauli_operators(; dim_left::Int, dim_right::Int)::Vector{Matrix{ComplexF64}}
     ħ = 1.0545718176461565e-34 # J s
     σ_x = [0 1; 1 0]
     σ_y = [0 -1im; 1im 0]
     σ_z = [1 0; 0 -1]
     A = ħ/2*[σ_x, σ_y, σ_z]
-    A_extended = [kron(kron(I(dim_left), A_i), I(dim_right)) for A_i in A]
+    A_extended = [kron(kron(I(dim_left), A_i), I(dim_right)) for  A_i in A]
     return A_extended
 end
 
@@ -45,7 +43,7 @@ function get_H_c(
     S::Matrix{Matrix{ComplexF64}},
     γ_c::Float64,
     B::Float64
-)
+)::Matrix{ComplexF64}
     ω = -γ_c*B
     S_x, S_z = S[:, 1], S[:, 3]
     @reduce H_c_0[p,q] := sum(i) ω/2*S_z[i][p,q]
@@ -53,7 +51,6 @@ function get_H_c(
     H_c = H_c_0 + H_c_int
 
     return H_c
-
 end
 
 
@@ -62,11 +59,10 @@ function get_H_s(
     S_b::Vector{Matrix{ComplexF64}},
     γ_s::Float64,
     B::Float64
-)
+)::Matrix{ComplexF64}
     ω = -γ_s*B
     S_az, S_bz = S_a[3], S_b[3]
     H_s = ω/2*(S_az + S_bz)
-
     return H_s
 end
 
@@ -81,7 +77,7 @@ function get_H_cs(
     S::Matrix{Matrix{ComplexF64}},
     γ_s::Float64,
     γ_c::Float64
-)
+)::Matrix{ComplexF64}
     nqubits = size(S, 1)
     μ_0 = 1.25663706212e-6 # N A^-2
     c = μ_0/(4π)*γ_s*γ_c
@@ -105,8 +101,26 @@ function get_H_cs(
 end
 
 
-function get_H(
-    nqubits::Int,
+function create_big_spin_operator(nqubits::Int)::Matrix{Matrix{ComplexF64}}
+    # S = [[s_1x, s_1y, s_1z], ...], [s_nx, s_ny, s_nz]]
+    # S es en verdad Vector{Vector{Matrix}}
+    nparticles = 2
+    n = nparticles + nqubits
+    # TODO: (nqubits, 3, 2**n, 2**n)
+    S = Matrix{Matrix{ComplexF64}}(undef, nqubits, 3)
+    for i in 1:nqubits
+        dim_l = 2^(i-1+nparticles)
+        dim_r = 2^(nqubits-i)
+        S[i, :] = extended_pauli_operators(dim_left=dim_l, dim_right=dim_r) #@inbound
+    end
+    return S
+end
+
+
+function build_hamiltonian(
+    S::Matrix{Matrix{ComplexF64}},
+    S_a::Vector{Matrix{ComplexF64}},
+    S_b::Vector{Matrix{ComplexF64}},
     d_c::Float64,
     d_s::Float64,
     D::Float64,
@@ -115,25 +129,9 @@ function get_H(
     γ_c::Float64,
     B::Float64
 )
-    nparticles = 2
-    n = nparticles + nqubits
-    # Build extended spin operators
-    S_a = extended_pauli_operators(dim_left=2^0, dim_right=2^(nqubits+1))
-    S_b = extended_pauli_operators(dim_left=2^1, dim_right=2^nqubits)
-    # S = [[s_1x, s_1y, s_1z], ...], [s_nx, s_ny, s_nz]]
-    # S es en verdad Vector{Vector{Matrix}}
-    S = Matrix{Matrix{ComplexF64}}(undef, nqubits, 3) # TODO: (nqubits, 3, 2**n, 2**n)
-    for i in 1:nqubits
-        dim_l = 2^(i-1+nparticles)
-        dim_r = 2^(nqubits-i)
-        S[i, :] = extended_pauli_operators(dim_left=dim_l, dim_right=dim_r) #@inbound
-    end
-
-    # Build the hamiltonians
     H_c = get_H_c(S, γ_c, B)
     H_s = get_H_s(S_a, S_b, γ_s, B)
     H_cs = get_H_cs(d_c, d_s, D, θ, S_a, S_b, S, γ_s, γ_c)
     H = H_c + H_s + H_cs
-
     return H
 end
