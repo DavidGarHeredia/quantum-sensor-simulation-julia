@@ -1,16 +1,5 @@
 using LinearAlgebra
 using TensorCast
-# import PhysicalConstants.CODATA2018: μ_0, k_B, ħ
-
-μ_0 = 1.25663706212e-6 # N A^-2
-k_B = 1.380649e-23 # J K^-1
-ħ = 1.0545718176461565e-34 # J s
-
-σ_x = [0 1; 1 0]
-σ_y = [0 -1im; 1im 0]
-σ_z = [1 0; 0 -1]
-σ = [σ_x, σ_y, σ_z]
-
 
 function get_qubits_coordinates(nqubits::Int, d_c::Float64)
     L = (nqubits - 1)*d_c
@@ -19,7 +8,7 @@ function get_qubits_coordinates(nqubits::Int, d_c::Float64)
     positions = cat(x, y; dims=2)
 
     return positions
-end 
+end
 
 
 function get_particles_coordinates(D::Float64, d_s::Float64, θ::Float64)
@@ -42,15 +31,12 @@ function cartesian2polar(coordinates::Matrix{Float64})
 end
 
 
-function extend_operators(
-    A::Vector{Matrix{ComplexF64}};
-    dim_left::Int,
-    dim_right::Int
-)
-    𝕀_left = I(dim_left)
-    𝕀_right = I(dim_right)
-    A_extended = [kron(kron(𝕀_left, A_i), 𝕀_right) for A_i in A]
-
+    ħ = 1.0545718176461565e-34 # J s
+    σ_x = [0 1; 1 0]
+    σ_y = [0 -1im; 1im 0]
+    σ_z = [1 0; 0 -1]
+    A = ħ/2*[σ_x, σ_y, σ_z]
+    A_extended = [kron(kron(I(dim_left), A_i), I(dim_right)) for A_i in A]
     return A_extended
 end
 
@@ -97,6 +83,7 @@ function get_H_cs(
     γ_c::Float64
 )
     nqubits = size(S, 1)
+    μ_0 = 1.25663706212e-6 # N A^-2
     c = μ_0/(4π)*γ_s*γ_c
     # Get positions
     position_a, position_b = get_particles_coordinates(D, d_s, θ)

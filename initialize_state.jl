@@ -14,6 +14,7 @@ function initialize_state(
     c_basis = I(2^nqubits)
     ket_0_c, ket_1_c = c_basis[1, :], c_basis[end, :]
     # System density matrix (thermal state: ρ_s = exp{-β*H_s}/Tr(exp{-β*H_s}))
+    k_B = 1.380649e-23 # J K^-1
     β = 1/(T*k_B)
     S_a = extend_operators(ħ/2*σ; dim_left=2^0, dim_right=2^1)
     S_b = extend_operators(ħ/2*σ; dim_left=2^1, dim_right=2^0)
