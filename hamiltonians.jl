@@ -118,6 +118,8 @@ end
 
 
 function build_hamiltonian(
+    H_c::Matrix{ComplexF64},
+    H_s::Matrix{ComplexF64},
     S::Matrix{Matrix{ComplexF64}},
     S_a::Vector{Matrix{ComplexF64}},
     S_b::Vector{Matrix{ComplexF64}},
@@ -127,11 +129,8 @@ function build_hamiltonian(
     θ::Float64,
     γ_s::Float64,
     γ_c::Float64,
-    B::Float64
 )
-    H_c = get_H_c(S, γ_c, B)
-    H_s = get_H_s(S_a, S_b, γ_s, B)
-    H_cs = get_H_cs(d_c, d_s, D, θ, S_a, S_b, S, γ_s, γ_c)
+    H_cs = build_camera_system_hamiltonian(d_c, d_s, D, θ, S_a, S_b, S, γ_s, γ_c)
     H = H_c + H_s + H_cs
     return H
 end
