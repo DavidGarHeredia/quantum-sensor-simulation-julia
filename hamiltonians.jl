@@ -26,11 +26,11 @@ end
 function cartesian2polar(coordinates::Matrix{Float64})
     r = vec(sqrt.(sum(coordinates.^2; dims=2)))
     θ = atan.(coordinates[:, 2], coordinates[:, 1])
-
     return r, θ
 end
 
 
+function extended_pauli_operators(; dim_left::Int, dim_right::Int)
     ħ = 1.0545718176461565e-34 # J s
     σ_x = [0 1; 1 0]
     σ_y = [0 -1im; 1im 0]
@@ -51,7 +51,7 @@ function get_H_c(
     @reduce H_c_0[p,q] := sum(i) ω/2*S_z[i][p,q]
     @reduce H_c_int[p,q] := sum(i,j,r) ω/10*S_x[i][p,r]*S_x[j][r,q] # TODO: case i=j???
     H_c = H_c_0 + H_c_int
-    
+
     return H_c
 
 end
@@ -118,15 +118,15 @@ function get_H(
     nparticles = 2
     n = nparticles + nqubits
     # Build extended spin operators
-    S_a = extend_operators(ħ/2*σ; dim_left=2^0, dim_right=2^(nqubits+1))
-    S_b = extend_operators(ħ/2*σ; dim_left=2^1, dim_right=2^nqubits)
+    S_a = extended_pauli_operators(dim_left=2^0, dim_right=2^(nqubits+1))
+    S_b = extended_pauli_operators(dim_left=2^1, dim_right=2^nqubits)
     # S = [[s_1x, s_1y, s_1z], ...], [s_nx, s_ny, s_nz]]
     # S es en verdad Vector{Vector{Matrix}}
     S = Matrix{Matrix{ComplexF64}}(undef, nqubits, 3) # TODO: (nqubits, 3, 2**n, 2**n)
     for i in 1:nqubits
         dim_l = 2^(i-1+nparticles)
         dim_r = 2^(nqubits-i)
-        S[i, :] = extend_operators(ħ/2*σ; dim_left=dim_l, dim_right=dim_r) #@inbound 
+        S[i, :] = extended_pauli_operators(dim_left=dim_l, dim_right=dim_r) #@inbound
     end
 
     # Build the hamiltonians
