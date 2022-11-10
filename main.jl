@@ -25,7 +25,6 @@ function main()
     config[:θ][:low] = deg2rad(config[:θ][:low])
     config[:θ][:high] = deg2rad(config[:θ][:high])
     measures = simulate(;config...)
-    # save results
     save_results(measures)
 end
 
