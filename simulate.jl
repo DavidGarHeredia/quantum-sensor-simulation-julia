@@ -26,7 +26,7 @@ function simulate(;
     entanglement::Bool
 )
     c_basis = create_basis_of_states_of_the_camera(nqubits)
-    projectors = [diagm(row) for row in eachrow((1*I)(2^nqubits))]
+    # projectors = [diagm(row) for row in eachrow((1*I)(2^nqubits))]
     D_vals, θ_vals, d_s_vals = generate_params_combinations_for_the_simulation(D, θ, d_s, nconfigs)
 
     S, S_a, S_b = build_extended_spin_operators(nqubits)
@@ -37,9 +37,10 @@ function simulate(;
     p = Progress(nconfigs) # Progress bar
     measures = Vector{Vector{Vector{Int64}}}(undef, nconfigs) #, nmeasures, nqubits)
     for i in 1:nconfigs
-        H = build_hamiltonian(H_c, H_s, S, S_a, S_b, d_c, d_s_vals[i], D_vals[i], θ_vals[i], γ_s, γ_c)
+        H = build_hamiltonian(H_c, H_s, S, S_a, S_b, d_c, d_s_vals[i],
+                              D_vals[i], θ_vals[i], γ_s, γ_c)
         ρ_t = time_evolution(ρ_0, H, t)
-        probabilities = get_probabilities(ρ_t, projectors)
+        probabilities = get_probabilities(ρ_t)
         measures[i] = measure(c_basis, probabilities, nmeasures) # @inbounds
         next!(p)  # Update progress bar
     end
