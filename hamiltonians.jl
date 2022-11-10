@@ -39,7 +39,7 @@ function extended_pauli_operators(; dim_left::Int, dim_right::Int)::Vector{Matri
 end
 
 
-function get_H_c(
+function build_camera_hamiltonian(
     S::Matrix{Matrix{ComplexF64}},
     γ_c::Float64,
     B::Float64
@@ -54,7 +54,7 @@ function get_H_c(
 end
 
 
-function get_H_s(
+function build_system_hamiltonian(
     S_a::Vector{Matrix{ComplexF64}},
     S_b::Vector{Matrix{ComplexF64}},
     γ_s::Float64,
@@ -67,7 +67,7 @@ function get_H_s(
 end
 
 
-function get_H_cs(
+function build_camera_system_hamiltonian(
     d_c::Float64,
     d_s::Float64,
     D::Float64,
