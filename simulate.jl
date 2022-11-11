@@ -2,8 +2,6 @@ using LinearAlgebra
 using TensorCast
 using ProgressMeter
 using Distributions
-using Base.Iterators
-using Base.Threads
 
 include("initialize_state.jl")
 include("hamiltonians.jl")
