@@ -14,5 +14,5 @@ Now all the dependencies of the environment have been installed and you can use 
 Modify the parameters of the simulation using `config.yml` and run
 
 ```
-$ julia --threads [#THREADS] --project main.jl config.yml
+$ julia --optimize=3 --threads [#THREADS] --project main.jl config.yml
 ```
