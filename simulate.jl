@@ -2,6 +2,7 @@ using LinearAlgebra
 using TensorCast
 using ProgressMeter
 using Distributions
+BLAS.set_num_threads(1)
 
 include("initialize_state.jl")
 include("hamiltonians.jl")
@@ -34,7 +35,7 @@ function simulate(;
 
     p = Progress(nconfigs) # Progress bar
     measures = Vector{Vector{Vector{Int64}}}(undef, nconfigs) #, nmeasures, nqubits)
-    for i in 1:nconfigs
+    Threads.@threads for i in 1:nconfigs
         H = build_hamiltonian(H_c, H_s, S, S_a, S_b, d_c, d_s_vals[i],
                               D_vals[i], θ_vals[i], γ_s, γ_c)
         ρ_t = time_evolution(ρ_0, H, t)
